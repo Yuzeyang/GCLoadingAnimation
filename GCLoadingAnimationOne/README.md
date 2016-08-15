@@ -8,7 +8,7 @@ This is a loading animation
 
 the triangle has a rotate anmation,but the gif can't show it…you can run the demo see the effect.
 
-![](https://github.com/Yuzeyang/GCLoadingAnimationOne/raw/master/GCLoadingAnimationOne.gif)
+![](https://github.com/Yuzeyang/GCLoadingAnimation/blob/master/GCLoadingAnimationOne/GCLoadingAnimationOne.gif)
 
 ## how to use
 
