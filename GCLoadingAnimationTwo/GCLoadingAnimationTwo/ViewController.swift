@@ -17,6 +17,7 @@ class ViewController: UIViewController {
         let slide: UISlider = UISlider(frame: CGRectMake(self.view.frame.size.width/2 - 50, self.view.frame.size.height - 100, 100, 50))
         self.view.addSubview(slide)
         slide.addTarget(self, action: #selector(updateProgress), forControlEvents: UIControlEvents.ValueChanged)
+        slide.setValue(1.0, animated: false)
         
         self.progressLabel.frame = CGRectMake(self.view.frame.size.width/2 - 100, self.view.frame.size.height - 150, 200, 50)
         self.progressLabel.textAlignment = .Center
