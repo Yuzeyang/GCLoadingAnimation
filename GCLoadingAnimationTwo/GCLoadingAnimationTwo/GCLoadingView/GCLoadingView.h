@@ -12,4 +12,8 @@
 
 - (instancetype)initWithScrollView:(UIView *)scrollView hasNavigationBar:(BOOL)hasNavigationBar;
 
+- (void)addLoadingBlock:(void(^)())block;
+
+- (void)stopLoading;
+
 @end

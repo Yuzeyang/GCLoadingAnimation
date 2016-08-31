@@ -14,6 +14,8 @@
 
 #define kGCPullMaxDistance  100
 
+typedef void(^GCLoadingBlock)();
+
 @interface GCLoadingView ()
 
 @property (nonatomic, strong) UIView *associatedView;
@@ -22,6 +24,7 @@
 @property (nonatomic, assign) BOOL isAnimating;
 @property (nonatomic, strong) UIView *centerHelperView;
 @property (nonatomic, strong) GCLoadingCircle *loadingCircle;
+@property (nonatomic, copy) GCLoadingBlock loadingBlock;
 
 // 辅助视图
 //@property (nonatomic, strong) UIView *l3;
@@ -111,6 +114,19 @@ static NSInteger kGCLoadingViewMinHeight =64;
     return _loadingCircle;
 }
 
+- (void)addLoadingBlock:(void (^)())block {
+    self.loadingBlock = block;
+}
+
+- (void)stopLoading {
+    [self.loadingCircle stopLoading];
+    [UIView animateWithDuration:1.0 delay:0 usingSpringWithDamping:0.5 initialSpringVelocity:0.0 options:UIViewAnimationOptionCurveEaseOut animations:^{
+        kGCLoadingViewMinHeight -= 30;
+        [self.centerHelperView setFrame:CGRectMake(CGRectGetWidth(self.associatedView.frame)/2, kGCLoadingViewMinHeight, 2, 2)];
+        self.isAnimating = NO;
+    } completion:nil];
+}
+
 - (void)drawOriginPath {
     UIBezierPath *path = [UIBezierPath bezierPath];
     [path moveToPoint:CGPointMake(0, 0)];
@@ -142,6 +158,11 @@ static NSInteger kGCLoadingViewMinHeight =64;
         } else {
             self.isAnimating = YES;
             [self.loadingCircle startLoading];
+            if (self.loadingBlock) {
+                self.loadingBlock();
+            }
+            
+            [self performSelector:@selector(stopLoading) withObject:nil afterDelay:2.0];
         }
         
         [UIView animateWithDuration:1.0 delay:0 usingSpringWithDamping:0.5 initialSpringVelocity:0.0 options:UIViewAnimationOptionCurveEaseOut animations:^{

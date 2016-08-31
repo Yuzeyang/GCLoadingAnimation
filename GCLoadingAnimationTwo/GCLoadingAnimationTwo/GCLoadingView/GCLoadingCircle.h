@@ -14,5 +14,6 @@
 
 - (void)setProgess:(CGFloat)progess;
 - (void)startLoading;
+- (void)stopLoading;
 
 @end

@@ -52,6 +52,10 @@
     [self.circleLayer addAnimation:rotationAnimation forKey:nil];
 }
 
-
+- (void)stopLoading {
+    [self.circleLayer removeAllAnimations];
+    [self.circleLayer removeFromSuperlayer];
+    self.circleLayer = nil;
+}
 
 @end
