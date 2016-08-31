@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		5B59AA0C1D76831E00451CEC /* UIView+GCAddition.m in Sources */ = {isa = PBXBuildFile; fileRef = 5B59AA0B1D76831E00451CEC /* UIView+GCAddition.m */; };
 		5B8985221D74568C00F86AC4 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 5B8985211D74568C00F86AC4 /* main.m */; };
 		5B8985251D74568C00F86AC4 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 5B8985241D74568C00F86AC4 /* AppDelegate.m */; };
 		5B8985281D74568C00F86AC4 /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 5B8985271D74568C00F86AC4 /* ViewController.m */; };
@@ -17,6 +18,8 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		5B59AA0A1D76831E00451CEC /* UIView+GCAddition.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "UIView+GCAddition.h"; sourceTree = "<group>"; };
+		5B59AA0B1D76831E00451CEC /* UIView+GCAddition.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "UIView+GCAddition.m"; sourceTree = "<group>"; };
 		5B89851D1D74568C00F86AC4 /* GCLoadingAnimationTwo.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = GCLoadingAnimationTwo.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		5B8985211D74568C00F86AC4 /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 		5B8985231D74568C00F86AC4 /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
@@ -88,6 +91,8 @@
 			children = (
 				5B89853F1D74576100F86AC4 /* GCLoadingView.h */,
 				5B8985401D74576100F86AC4 /* GCLoadingView.m */,
+				5B59AA0A1D76831E00451CEC /* UIView+GCAddition.h */,
+				5B59AA0B1D76831E00451CEC /* UIView+GCAddition.m */,
 			);
 			path = GCLoadingView;
 			sourceTree = "<group>";
@@ -164,6 +169,7 @@
 			files = (
 				5B8985281D74568C00F86AC4 /* ViewController.m in Sources */,
 				5B8985411D74576100F86AC4 /* GCLoadingView.m in Sources */,
+				5B59AA0C1D76831E00451CEC /* UIView+GCAddition.m in Sources */,
 				5B8985251D74568C00F86AC4 /* AppDelegate.m in Sources */,
 				5B8985221D74568C00F86AC4 /* main.m in Sources */,
 			);
@@ -322,6 +328,7 @@
 				5B8985361D74568D00F86AC4 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
