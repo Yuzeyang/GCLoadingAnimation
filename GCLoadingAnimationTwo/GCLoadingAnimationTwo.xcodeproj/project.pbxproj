@@ -14,6 +14,7 @@
 		5B89852D1D74568C00F86AC4 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 5B89852C1D74568C00F86AC4 /* Assets.xcassets */; };
 		5B8985301D74568D00F86AC4 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 5B89852E1D74568D00F86AC4 /* LaunchScreen.storyboard */; };
 		5B8985411D74576100F86AC4 /* GCLoadingView.m in Sources */ = {isa = PBXBuildFile; fileRef = 5B8985401D74576100F86AC4 /* GCLoadingView.m */; };
+		5BECD87B1D76C4E200F72CCD /* GCLoadingCircle.m in Sources */ = {isa = PBXBuildFile; fileRef = 5BECD87A1D76C4E200F72CCD /* GCLoadingCircle.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -29,6 +30,8 @@
 		5B8985311D74568D00F86AC4 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		5B89853F1D74576100F86AC4 /* GCLoadingView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GCLoadingView.h; sourceTree = "<group>"; };
 		5B8985401D74576100F86AC4 /* GCLoadingView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GCLoadingView.m; sourceTree = "<group>"; };
+		5BECD8791D76C4E200F72CCD /* GCLoadingCircle.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GCLoadingCircle.h; sourceTree = "<group>"; };
+		5BECD87A1D76C4E200F72CCD /* GCLoadingCircle.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GCLoadingCircle.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -88,6 +91,8 @@
 			children = (
 				5B89853F1D74576100F86AC4 /* GCLoadingView.h */,
 				5B8985401D74576100F86AC4 /* GCLoadingView.m */,
+				5BECD8791D76C4E200F72CCD /* GCLoadingCircle.h */,
+				5BECD87A1D76C4E200F72CCD /* GCLoadingCircle.m */,
 			);
 			path = GCLoadingView;
 			sourceTree = "<group>";
@@ -165,6 +170,7 @@
 				5B8985281D74568C00F86AC4 /* ViewController.m in Sources */,
 				5B8985411D74576100F86AC4 /* GCLoadingView.m in Sources */,
 				5B8985251D74568C00F86AC4 /* AppDelegate.m in Sources */,
+				5BECD87B1D76C4E200F72CCD /* GCLoadingCircle.m in Sources */,
 				5B8985221D74568C00F86AC4 /* main.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

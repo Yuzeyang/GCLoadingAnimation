@@ -7,10 +7,12 @@
 //
 
 #import "GCLoadingView.h"
-#import "UIView+GCAddition.h"
+#import "GCLoadingCircle.h"
 
-#define kGCLoadingViewMinHeight 64
+//#define kGCLoadingViewMinHeight 64
 #define kGCLoadingViewMaxHeight 250
+
+#define kGCPullMaxDistance  100
 
 @interface GCLoadingView ()
 
@@ -19,6 +21,7 @@
 @property (nonatomic, strong) CADisplayLink *displayLink;
 @property (nonatomic, assign) BOOL isAnimating;
 @property (nonatomic, strong) UIView *centerHelperView;
+@property (nonatomic, strong) GCLoadingCircle *loadingCircle;
 
 // 辅助视图
 //@property (nonatomic, strong) UIView *l3;
@@ -31,6 +34,8 @@
 
 @end
 
+static NSInteger kGCLoadingViewMinHeight =64;
+
 @implementation GCLoadingView
 
 - (instancetype)initWithScrollView:(UIView *)scrollView hasNavigationBar:(BOOL)hasNavigationBar {
@@ -38,17 +43,6 @@
     if (self) {
         self.associatedView = scrollView;
         self.isAnimating = NO;
-        
-        self.displayLink = [CADisplayLink displayLinkWithTarget:self selector:@selector(displayLinkAction:)];
-        [self.displayLink addToRunLoop:[NSRunLoop currentRunLoop] forMode:NSDefaultRunLoopMode];
-        self.displayLink.paused = YES;
-        
-        self.loadLayer = [CAShapeLayer layer];
-        self.loadLayer.fillColor = [UIColor colorWithRed:255/255.0 green:80/255.0 blue:80/255.0 alpha:1].CGColor;
-        self.loadLayer.actions = @{@"position": [NSNull null],
-                                   @"bounds": [NSNull null],
-                                   @"path": [NSNull null]};
-        [self.layer addSublayer:self.loadLayer];
         
         [self drawOriginPath];
         [self addPanGestureInAssociatedView];
@@ -86,6 +80,37 @@
     return _centerHelperView;
 }
 
+- (CAShapeLayer *)loadLayer {
+    if (!_loadLayer) {
+        _loadLayer = [CAShapeLayer layer];
+        _loadLayer.fillColor = [UIColor colorWithRed:255/255.0 green:80/255.0 blue:80/255.0 alpha:1].CGColor;
+        _loadLayer.actions = @{@"position": [NSNull null],
+                                   @"bounds": [NSNull null],
+                                   @"path": [NSNull null]};
+        [self.layer addSublayer:_loadLayer];
+    }
+    return _loadLayer;
+}
+
+- (CADisplayLink *)displayLink {
+    if (!_displayLink) {
+        _displayLink = [CADisplayLink displayLinkWithTarget:self selector:@selector(displayLinkAction:)];
+        [_displayLink addToRunLoop:[NSRunLoop currentRunLoop] forMode:NSDefaultRunLoopMode];
+        _displayLink.paused = YES;
+    }
+    return _displayLink;
+}
+
+- (GCLoadingCircle *)loadingCircle {
+    if (!_loadingCircle) {
+        _loadingCircle = [[GCLoadingCircle alloc] initWithFrame:CGRectMake(CGRectGetWidth(self.associatedView.frame)/2,
+                                                                           40 + kGCLoadingCircleRadius, 1, 1)];
+        _loadingCircle.backgroundColor = [UIColor clearColor];
+        [self addSubview:_loadingCircle];
+    }
+    return _loadingCircle;
+}
+
 - (void)drawOriginPath {
     UIBezierPath *path = [UIBezierPath bezierPath];
     [path moveToPoint:CGPointMake(0, 0)];
@@ -102,22 +127,54 @@
 }
 
 - (void)updateLoadLayer:(UIPanGestureRecognizer *)panGesture {
+    if (self.isAnimating) {
+        return;
+    }
+    
     if (panGesture.state == UIGestureRecognizerStateEnded ||
         panGesture.state == UIGestureRecognizerStateCancelled ||
         panGesture.state == UIGestureRecognizerStateFailed) {
+        if ([panGesture translationInView:self.associatedView].y < kGCPullMaxDistance) {
+            self.isAnimating = NO;
+            [UIView animateWithDuration:1.0 animations:^{
+                [self.loadingCircle setProgess:0];
+            }];
+        } else {
+            self.isAnimating = YES;
+            [self.loadingCircle startLoading];
+        }
+        
         [UIView animateWithDuration:1.0 delay:0 usingSpringWithDamping:0.5 initialSpringVelocity:0.0 options:UIViewAnimationOptionCurveEaseOut animations:^{
+//            CGFloat centerY = self.isAnimating ? kGCLoadingViewMinHeight + 30 : kGCLoadingViewMinHeight;
+            kGCLoadingViewMinHeight = self.isAnimating ? kGCLoadingViewMinHeight + 30 : kGCLoadingViewMinHeight;
             [self.centerHelperView setFrame:CGRectMake(CGRectGetWidth(self.associatedView.frame)/2, kGCLoadingViewMinHeight, 2, 2)];
         } completion:nil];
         
+        // ==============
+//        if ([panGesture translationInView:self.associatedView].y < kGCPullMaxDistance) {
+//            [UIView animateWithDuration:1.0 delay:0 usingSpringWithDamping:0.5 initialSpringVelocity:0.0 options:UIViewAnimationOptionCurveEaseOut animations:^{
+//                [self.centerHelperView setFrame:CGRectMake(CGRectGetWidth(self.associatedView.frame)/2, kGCLoadingViewMinHeight, 2, 2)];
+//            } completion:nil];
+//            [UIView animateWithDuration:1.0 animations:^{
+//                [self.loadingCircle setProgess:0];
+//            }];
+//        } else {
+//            [UIView animateWithDuration:1.0 delay:0 usingSpringWithDamping:0.5 initialSpringVelocity:0.0 options:UIViewAnimationOptionCurveEaseOut animations:^{
+//                [self.centerHelperView setFrame:CGRectMake(CGRectGetWidth(self.associatedView.frame)/2, kGCLoadingViewMinHeight + 30, 2, 2)];
+//            } completion:nil];
+//            [self.loadingCircle startLoading];
+//        }
     } else {
         if (self.displayLink.paused) {
             self.displayLink.paused = NO;
         }
-        self.isAnimating = YES;
+        
         CGFloat translationY = [panGesture translationInView:self.associatedView].y;
         CGFloat locationX = [panGesture locationInView:self.associatedView].x;
         CGFloat locationY = MIN(MAX(translationY + kGCLoadingViewMinHeight, kGCLoadingViewMinHeight), kGCLoadingViewMaxHeight);
         [self.centerHelperView setFrame:CGRectMake(locationX, locationY, 2, 2)];
+        CGFloat progress = MAX(MIN(kGCPullMaxDistance, translationY)/kGCPullMaxDistance, 0);
+        [self.loadingCircle setProgess:progress];
     }
 }
 
@@ -125,7 +182,10 @@
     CGFloat x = center.x;
     CGFloat y = center.y;
     CGFloat locationY = (y - kGCLoadingViewMinHeight)/2 + kGCLoadingViewMinHeight;
-    
+//    if (self.isAnimating) {
+//        locationY += 30;
+//    }
+
 //    [self.l3 setFrame:CGRectMake(0, locationY, 2, 2)];
 //    [self.l2 setFrame:CGRectMake(x/3, locationY, 2, 2)];
 //    [self.l1 setFrame:CGRectMake(2*x/3, locationY + (y - kGCLoadingViewMinHeight)/4, 2, 2)];
