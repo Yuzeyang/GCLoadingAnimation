@@ -42,11 +42,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "GCLoadingAnimationTwo/GCLoadingView/GCLoadingView.m"
-            timestampString = "494426486.181649"
+            timestampString = "494426929.151128"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "117"
-            endingLineNumber = "117"
+            startingLineNumber = "86"
+            endingLineNumber = "86"
             landmarkName = "-loadingCircle"
             landmarkType = "5">
          </BreakpointContent>
@@ -58,11 +58,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "GCLoadingAnimationTwo/GCLoadingView/GCLoadingView.m"
-            timestampString = "494426486.181649"
+            timestampString = "494426929.151128"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "56"
-            endingLineNumber = "56"
+            startingLineNumber = "47"
+            endingLineNumber = "47"
             landmarkName = "-initWithScrollView:"
             landmarkType = "5">
          </BreakpointContent>
@@ -74,11 +74,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "GCLoadingAnimationTwo/GCLoadingView/GCLoadingView.m"
-            timestampString = "494426486.181649"
+            timestampString = "494426929.151128"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "174"
-            endingLineNumber = "174"
+            startingLineNumber = "143"
+            endingLineNumber = "143"
             landmarkName = "-drawLoadLayerWithCenter:"
             landmarkType = "5">
          </BreakpointContent>
