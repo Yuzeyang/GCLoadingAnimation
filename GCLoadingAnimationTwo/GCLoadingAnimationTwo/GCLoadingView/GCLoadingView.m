@@ -32,15 +32,6 @@ typedef void(^GCLoadingBlock)();
 @property (nonatomic, strong) GCLoadingCircle *loadingCircle;
 @property (nonatomic, copy) GCLoadingBlock loadingBlock;
 
-// 辅助视图
-//@property (nonatomic, strong) UIView *l3;
-//@property (nonatomic, strong) UIView *l2;
-//@property (nonatomic, strong) UIView *l1;
-//@property (nonatomic, strong) UIView *c;
-//@property (nonatomic, strong) UIView *r3;
-//@property (nonatomic, strong) UIView *r2;
-//@property (nonatomic, strong) UIView *r1;
-
 @end
 
 static NSInteger kGCLoadingViewMinHeight = 64;
@@ -55,28 +46,6 @@ static NSInteger kGCLoadingViewMinHeight = 64;
         
         [self drawOriginPath];
         [self addObersers];
-        
-//        self.l3 = [UIView new];
-//        self.l2 = [UIView new];
-//        self.l1 = [UIView new];
-//        self.c = [UIView new];
-//        self.r3 = [UIView new];
-//        self.r2 = [UIView new];
-//        self.r1 = [UIView new];
-//        self.l3.backgroundColor = [UIColor blackColor];
-//        self.l2.backgroundColor = [UIColor blackColor];
-//        self.l1.backgroundColor = [UIColor blackColor];
-//        self.c.backgroundColor = [UIColor blackColor];
-//        self.r3.backgroundColor = [UIColor blackColor];
-//        self.r2.backgroundColor = [UIColor blackColor];
-//        self.r1.backgroundColor = [UIColor blackColor];
-//        [self addSubview:self.l3];
-//        [self addSubview:self.l2];
-//        [self addSubview:self.l1];
-//        [self addSubview:self.c];
-//        [self addSubview:self.r3];
-//        [self addSubview:self.r2];
-//        [self addSubview:self.r1];
     }
     return self;
 }
@@ -175,14 +144,6 @@ static NSInteger kGCLoadingViewMinHeight = 64;
     CGFloat y = center.y;
     CGFloat locationY = (y - kGCLoadingViewMinHeight)/2 + kGCLoadingViewMinHeight;
 
-//    [self.l3 setFrame:CGRectMake(0, locationY, 2, 2)];
-//    [self.l2 setFrame:CGRectMake(x/3, locationY, 2, 2)];
-//    [self.l1 setFrame:CGRectMake(2*x/3, locationY + (y - kGCLoadingViewMinHeight)/4, 2, 2)];
-////    [self.c setFrame:CGRectMake(x, y, 2, 2)];
-//    [self.r3 setFrame:CGRectMake(CGRectGetWidth(self.associatedView.frame), locationY, 2, 2)];
-//    [self.r2 setFrame:CGRectMake(CGRectGetWidth(self.associatedView.frame)*2/3 + x/3, locationY, 2, 2)];
-//    [self.r1 setFrame:CGRectMake(CGRectGetWidth(self.associatedView.frame)/3 + 2*x/3, locationY + (y - kGCLoadingViewMinHeight)/4, 2, 2)];
-    
     CGPoint l3 = CGPointMake(0, locationY);
     CGPoint l2 = CGPointMake(x/3, locationY);
     CGPoint l1 = CGPointMake(2*x/3, locationY + (y - kGCLoadingViewMinHeight)/4);
