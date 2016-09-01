@@ -9,20 +9,26 @@
 #import "GCLoadingView.h"
 #import "GCLoadingCircle.h"
 
-//#define kGCLoadingViewMinHeight 64
 #define kGCLoadingViewMaxHeight 250
 
-#define kGCPullMaxDistance  100
+#define kGCPullMaxDistance  60
+
+typedef NS_ENUM(NSInteger, GCLoadingState) {
+    GCLoadingStateNormal,
+    GCLoadingStateLoading,
+    GCLoadingStateCancelled
+};
 
 typedef void(^GCLoadingBlock)();
 
 @interface GCLoadingView ()
 
-@property (nonatomic, strong) UIView *associatedView;
+@property (nonatomic, strong) UIScrollView *associatedScrollView;
 @property (nonatomic, strong) CAShapeLayer *loadLayer;
 @property (nonatomic, strong) CADisplayLink *displayLink;
-@property (nonatomic, assign) BOOL isAnimating;
+@property (nonatomic, assign) GCLoadingState loadingState;
 @property (nonatomic, strong) UIView *centerHelperView;
+@property (nonatomic, assign) CGFloat progress;
 @property (nonatomic, strong) GCLoadingCircle *loadingCircle;
 @property (nonatomic, copy) GCLoadingBlock loadingBlock;
 
@@ -37,18 +43,18 @@ typedef void(^GCLoadingBlock)();
 
 @end
 
-static NSInteger kGCLoadingViewMinHeight =64;
+static NSInteger kGCLoadingViewMinHeight = 64;
 
 @implementation GCLoadingView
 
-- (instancetype)initWithScrollView:(UIView *)scrollView hasNavigationBar:(BOOL)hasNavigationBar {
+- (instancetype)initWithScrollView:(UIScrollView *)scrollView {
     self = [super init];
     if (self) {
-        self.associatedView = scrollView;
-        self.isAnimating = NO;
+        self.associatedScrollView = scrollView;
+        self.loadingState = GCLoadingStateNormal;
         
         [self drawOriginPath];
-        [self addPanGestureInAssociatedView];
+        [self addObersers];
         
 //        self.l3 = [UIView new];
 //        self.l2 = [UIView new];
@@ -98,7 +104,7 @@ static NSInteger kGCLoadingViewMinHeight =64;
 - (CADisplayLink *)displayLink {
     if (!_displayLink) {
         _displayLink = [CADisplayLink displayLinkWithTarget:self selector:@selector(displayLinkAction:)];
-        [_displayLink addToRunLoop:[NSRunLoop currentRunLoop] forMode:NSDefaultRunLoopMode];
+        [_displayLink addToRunLoop:[NSRunLoop currentRunLoop] forMode:NSRunLoopCommonModes];
         _displayLink.paused = YES;
     }
     return _displayLink;
@@ -106,7 +112,7 @@ static NSInteger kGCLoadingViewMinHeight =64;
 
 - (GCLoadingCircle *)loadingCircle {
     if (!_loadingCircle) {
-        _loadingCircle = [[GCLoadingCircle alloc] initWithFrame:CGRectMake(CGRectGetWidth(self.associatedView.frame)/2,
+        _loadingCircle = [[GCLoadingCircle alloc] initWithFrame:CGRectMake(CGRectGetWidth(self.associatedScrollView.frame)/2,
                                                                            40 + kGCLoadingCircleRadius, 1, 1)];
         _loadingCircle.backgroundColor = [UIColor clearColor];
         [self addSubview:_loadingCircle];
@@ -119,11 +125,11 @@ static NSInteger kGCLoadingViewMinHeight =64;
 }
 
 - (void)stopLoading {
+    self.loadingState = GCLoadingStateNormal;
+    kGCLoadingViewMinHeight = 64;
     [self.loadingCircle stopLoading];
     [UIView animateWithDuration:1.0 delay:0 usingSpringWithDamping:0.5 initialSpringVelocity:0.0 options:UIViewAnimationOptionCurveEaseOut animations:^{
-        kGCLoadingViewMinHeight -= 30;
-        [self.centerHelperView setFrame:CGRectMake(CGRectGetWidth(self.associatedView.frame)/2, kGCLoadingViewMinHeight, 2, 2)];
-        self.isAnimating = NO;
+        [self.centerHelperView setFrame:CGRectMake(CGRectGetWidth(self.associatedScrollView.frame)/2, kGCLoadingViewMinHeight, 2, 2)];
     } completion:nil];
 }
 
@@ -131,81 +137,43 @@ static NSInteger kGCLoadingViewMinHeight =64;
     UIBezierPath *path = [UIBezierPath bezierPath];
     [path moveToPoint:CGPointMake(0, 0)];
     [path addLineToPoint:CGPointMake(0, kGCLoadingViewMinHeight)];
-    [path addLineToPoint:CGPointMake(CGRectGetWidth(self.associatedView.frame), kGCLoadingViewMinHeight)];
-    [path addLineToPoint:CGPointMake(CGRectGetWidth(self.associatedView.frame), 0)];
+    [path addLineToPoint:CGPointMake(CGRectGetWidth(self.associatedScrollView.frame), kGCLoadingViewMinHeight)];
+    [path addLineToPoint:CGPointMake(CGRectGetWidth(self.associatedScrollView.frame), 0)];
     
     self.loadLayer.path = path.CGPath;
 }
 
-- (void)addPanGestureInAssociatedView {
-    UIPanGestureRecognizer *panGesture = [[UIPanGestureRecognizer alloc] initWithTarget:self action:@selector(updateLoadLayer:)];
-    [self.associatedView addGestureRecognizer:panGesture];
+- (void)addObersers {
+    [self.associatedScrollView addObserver:self forKeyPath:@"contentOffset" options:NSKeyValueObservingOptionNew context:nil];
+    [self.associatedScrollView addObserver:self forKeyPath:@"panGestureRecognizer.state" options:NSKeyValueObservingOptionNew context:nil];
 }
 
-- (void)updateLoadLayer:(UIPanGestureRecognizer *)panGesture {
-    if (self.isAnimating) {
+- (void)setProgress:(CGFloat)progress {
+    _progress = progress;
+    
+    if (self.loadingState == GCLoadingStateLoading) {
         return;
     }
     
-    if (panGesture.state == UIGestureRecognizerStateEnded ||
-        panGesture.state == UIGestureRecognizerStateCancelled ||
-        panGesture.state == UIGestureRecognizerStateFailed) {
-        if ([panGesture translationInView:self.associatedView].y < kGCPullMaxDistance) {
-            self.isAnimating = NO;
-            [UIView animateWithDuration:1.0 animations:^{
-                [self.loadingCircle setProgess:0];
-            }];
-        } else {
-            self.isAnimating = YES;
-            [self.loadingCircle startLoading];
-            if (self.loadingBlock) {
-                self.loadingBlock();
-            }
-            
-            [self performSelector:@selector(stopLoading) withObject:nil afterDelay:2.0];
-        }
-        
-        [UIView animateWithDuration:1.0 delay:0 usingSpringWithDamping:0.5 initialSpringVelocity:0.0 options:UIViewAnimationOptionCurveEaseOut animations:^{
-//            CGFloat centerY = self.isAnimating ? kGCLoadingViewMinHeight + 30 : kGCLoadingViewMinHeight;
-            kGCLoadingViewMinHeight = self.isAnimating ? kGCLoadingViewMinHeight + 30 : kGCLoadingViewMinHeight;
-            [self.centerHelperView setFrame:CGRectMake(CGRectGetWidth(self.associatedView.frame)/2, kGCLoadingViewMinHeight, 2, 2)];
-        } completion:nil];
-        
-        // ==============
-//        if ([panGesture translationInView:self.associatedView].y < kGCPullMaxDistance) {
-//            [UIView animateWithDuration:1.0 delay:0 usingSpringWithDamping:0.5 initialSpringVelocity:0.0 options:UIViewAnimationOptionCurveEaseOut animations:^{
-//                [self.centerHelperView setFrame:CGRectMake(CGRectGetWidth(self.associatedView.frame)/2, kGCLoadingViewMinHeight, 2, 2)];
-//            } completion:nil];
-//            [UIView animateWithDuration:1.0 animations:^{
-//                [self.loadingCircle setProgess:0];
-//            }];
-//        } else {
-//            [UIView animateWithDuration:1.0 delay:0 usingSpringWithDamping:0.5 initialSpringVelocity:0.0 options:UIViewAnimationOptionCurveEaseOut animations:^{
-//                [self.centerHelperView setFrame:CGRectMake(CGRectGetWidth(self.associatedView.frame)/2, kGCLoadingViewMinHeight + 30, 2, 2)];
-//            } completion:nil];
-//            [self.loadingCircle startLoading];
-//        }
-    } else {
-        if (self.displayLink.paused) {
-            self.displayLink.paused = NO;
-        }
-        
-        CGFloat translationY = [panGesture translationInView:self.associatedView].y;
-        CGFloat locationX = [panGesture locationInView:self.associatedView].x;
+    if (self.displayLink.paused) {
+        self.displayLink.paused = NO;
+    }
+
+    if (self.loadingState == GCLoadingStateNormal) {
+        UIPanGestureRecognizer *panGesture = self.associatedScrollView.panGestureRecognizer;
+        CGFloat translationY = [panGesture translationInView:self.associatedScrollView].y;
+        CGFloat locationX = [panGesture locationInView:self.associatedScrollView].x;
         CGFloat locationY = MIN(MAX(translationY + kGCLoadingViewMinHeight, kGCLoadingViewMinHeight), kGCLoadingViewMaxHeight);
         [self.centerHelperView setFrame:CGRectMake(locationX, locationY, 2, 2)];
-        CGFloat progress = MAX(MIN(kGCPullMaxDistance, translationY)/kGCPullMaxDistance, 0);
-        [self.loadingCircle setProgess:progress];
     }
+
+    [self.loadingCircle setProgess:progress];
 }
 
 - (void)drawLoadLayerWithCenter:(CGPoint)center {
     CGFloat x = center.x;
     CGFloat y = center.y;
     CGFloat locationY = (y - kGCLoadingViewMinHeight)/2 + kGCLoadingViewMinHeight;
-//    if (self.isAnimating) {
-//        locationY += 30;
-//    }
 
 //    [self.l3 setFrame:CGRectMake(0, locationY, 2, 2)];
 //    [self.l2 setFrame:CGRectMake(x/3, locationY, 2, 2)];
@@ -219,9 +187,9 @@ static NSInteger kGCLoadingViewMinHeight =64;
     CGPoint l2 = CGPointMake(x/3, locationY);
     CGPoint l1 = CGPointMake(2*x/3, locationY + (y - kGCLoadingViewMinHeight)/4);
     CGPoint c = CGPointMake(x, y);
-    CGPoint r1 = CGPointMake(CGRectGetWidth(self.associatedView.frame)/3 + 2*x/3, locationY + (y - kGCLoadingViewMinHeight)/4);
-    CGPoint r2 = CGPointMake(CGRectGetWidth(self.associatedView.frame)*2/3 + x/3, locationY);
-    CGPoint r3 = CGPointMake(CGRectGetWidth(self.associatedView.frame), locationY);
+    CGPoint r1 = CGPointMake(CGRectGetWidth(self.associatedScrollView.frame)/3 + 2*x/3, locationY + (y - kGCLoadingViewMinHeight)/4);
+    CGPoint r2 = CGPointMake(CGRectGetWidth(self.associatedScrollView.frame)*2/3 + x/3, locationY);
+    CGPoint r3 = CGPointMake(CGRectGetWidth(self.associatedScrollView.frame), locationY);
     
     UIBezierPath *path = [UIBezierPath bezierPath];
     [path moveToPoint:CGPointMake(0, 0)];
@@ -229,7 +197,7 @@ static NSInteger kGCLoadingViewMinHeight =64;
     [path addCurveToPoint:l1 controlPoint1:l3 controlPoint2:l2];
     [path addCurveToPoint:r1 controlPoint1:l1 controlPoint2:c];
     [path addCurveToPoint:r3 controlPoint1:r1 controlPoint2:r2];
-    [path addLineToPoint:CGPointMake(CGRectGetWidth(self.associatedView.frame), 0)];
+    [path addLineToPoint:CGPointMake(CGRectGetWidth(self.associatedScrollView.frame), 0)];
     
     self.loadLayer.path = path.CGPath;
 }
@@ -238,6 +206,57 @@ static NSInteger kGCLoadingViewMinHeight =64;
     CALayer *centerHelperViewLayer = (CALayer *)[self.centerHelperView.layer presentationLayer];
     CGRect centerHelperViewRect = [[centerHelperViewLayer valueForKey:@"frame"] CGRectValue];
     [self drawLoadLayerWithCenter:centerHelperViewRect.origin];
+}
+
+- (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary<NSString *,id> *)change context:(void *)context {
+    if ([keyPath isEqualToString:@"contentOffset"]) {
+        CGPoint contentOffset = [[change valueForKey:NSKeyValueChangeNewKey] CGPointValue];
+        if (contentOffset.y < 0) {
+            self.progress = MAX(0.0, MIN(fabs(contentOffset.y/kGCPullMaxDistance), 1.0));
+        } else {
+            self.progress = 0;
+        }
+    }
+    
+    if ([keyPath isEqualToString:@"panGestureRecognizer.state"]) {
+        NSInteger state = [[change valueForKey:NSKeyValueChangeNewKey] integerValue];
+        if (state == UIGestureRecognizerStateEnded ||
+            state == UIGestureRecognizerStateCancelled ||
+            state == UIGestureRecognizerStateFailed) {
+            if (self.loadingState != GCLoadingStateNormal) {
+                return;
+            }
+            
+            if (self.progress < 1.0) {
+                if (self.progress == 0) {
+                    self.loadingState = GCLoadingStateNormal;
+                } else {
+                    self.loadingState = GCLoadingStateCancelled;
+                    self.associatedScrollView.scrollEnabled = NO;
+                }
+            } else {
+                self.loadingState = GCLoadingStateLoading;
+                kGCLoadingViewMinHeight+=30;
+                [self.loadingCircle startLoading];
+                self.associatedScrollView.scrollEnabled = NO;
+                if (self.loadingBlock) {
+                    self.loadingBlock();
+                }
+            }
+            
+            if (self.loadingState != GCLoadingStateNormal) {
+                [UIView animateWithDuration:1.0 delay:0 usingSpringWithDamping:0.5 initialSpringVelocity:0.0 options:UIViewAnimationOptionCurveEaseOut animations:^{
+                    [self.centerHelperView setFrame:CGRectMake(CGRectGetWidth(self.associatedScrollView.frame)/2, kGCLoadingViewMinHeight, 2, 2)];
+                } completion:^(BOOL finished) {
+                    self.associatedScrollView.scrollEnabled = YES;
+                    if (self.loadingState == GCLoadingStateCancelled) {
+                        self.loadingState = GCLoadingStateNormal;
+                    }
+                }];
+            }
+
+        }
+    }
 }
 
 @end

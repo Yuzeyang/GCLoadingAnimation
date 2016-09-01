@@ -30,7 +30,7 @@
 - (CAShapeLayer *)circleLayer {
     if (!_circleLayer) {
         _circleLayer = [CAShapeLayer layer];
-        _circleLayer.strokeColor = [UIColor blackColor].CGColor;
+        _circleLayer.strokeColor = [UIColor darkGrayColor].CGColor;
         _circleLayer.fillColor = [UIColor clearColor].CGColor;
         [self.layer addSublayer:_circleLayer];
     }

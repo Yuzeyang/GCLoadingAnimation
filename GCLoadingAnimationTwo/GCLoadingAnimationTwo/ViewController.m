@@ -11,6 +11,9 @@
 
 @interface ViewController ()
 
+@property (weak, nonatomic) IBOutlet UITableView *tableView;
+@property (nonatomic, strong) GCLoadingView *loadingView;
+
 @end
 
 @implementation ViewController
@@ -18,9 +21,19 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
     
-    GCLoadingView *loadingView = [[GCLoadingView alloc] initWithScrollView:self.view hasNavigationBar:NO];
-    [self.view addSubview:loadingView];
-    
+    self.loadingView = [[GCLoadingView alloc] initWithScrollView:self.tableView];
+    __weak __typeof(&*self)weakSelf = self;
+    [self.loadingView addLoadingBlock:^{
+        // do some net work
+        
+        // mock after 3 seconds stop loadiing
+        int64_t delta = 3;
+        dispatch_time_t time = dispatch_time(DISPATCH_TIME_NOW, delta * NSEC_PER_SEC);
+        dispatch_after(time, dispatch_get_main_queue(), ^{
+            [weakSelf.loadingView stopLoading];
+        });
+    }];
+    [self.view addSubview:self.loadingView];
     // Do any additional setup after loading the view, typically from a nib.
 }
 
