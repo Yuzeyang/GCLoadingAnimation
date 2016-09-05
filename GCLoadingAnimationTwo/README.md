@@ -28,3 +28,6 @@ __weak __typeof(&*self)weakSelf = self;
 [self.view addSubview:self.loadingView];
 ```
 
+## Related articles
+
+[果冻效果下拉刷新控件](http://zeeyang.com/2016/09/02/loadingAniamtion-0902/)

@@ -21,3 +21,6 @@ self.loadingLayer.frame = CGRectMake(GCLoadingLayerCenterX, GCLoadingLayerCenter
 [self.loadingLayer startAnimation];
 ```
 
+## Related articles
+
+[加载动画分析](http://zeeyang.com/2016/07/27/loadingAnimation-0727/)
